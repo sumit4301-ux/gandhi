@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>College Digital Receipt Book</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>
+:root{--n:#1e3a8a;--d:#0f172a;--bg:#f4f7fc;--b:#dbe3f0;--r:#dc2626;--g:#16a34a}
+*{box-sizing:border-box}body{margin:0;font:13px system-ui,sans-serif;background:var(--bg);color:#1e293b}
+header{display:flex;align-items:center;gap:10px;padding:8px 14px;background:#fff;border-bottom:3px solid var(--n)}
+header img{height:34px}header b{color:var(--n);font-size:14px}header small{display:block;font-size:10px;color:#64748b}
+nav{display:flex;overflow-x:auto;background:var(--d)}nav a{color:#cbd5e1;padding:10px 12px;white-space:nowrap;cursor:pointer;font-weight:600}
+nav a.on{background:#fff;color:var(--n);border-bottom:3px solid #38bdf8}
+main{padding:12px;max-width:1100px;margin:auto}.card{background:#fff;border-radius:10px;padding:14px;box-shadow:0 1px 6px #0001;margin-bottom:12px}
+h3{margin:0 0 10px;color:var(--n);font-size:14px;display:flex;justify-content:space-between;align-items:center}
+label{display:block;font-size:11px;font-weight:600;margin:8px 0 3px}input,select,textarea{width:100%;padding:8px;border:1px solid var(--b);border-radius:6px;font:inherit;background:#fff}
+.g{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:0 10px}
+button{background:linear-gradient(90deg,var(--n),#2748c4);color:#fff;border:0;border-radius:6px;padding:8px 12px;font-weight:700;cursor:pointer;font:inherit;font-weight:700}
+button.s{background:#e8edf7;color:var(--n);padding:5px 9px}button.x{background:#fee2e2;color:var(--r);padding:5px 9px}button.w{width:100%;margin-top:12px}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}.st{background:#fff;border-left:4px solid var(--n);padding:12px;border-radius:8px;box-shadow:0 1px 6px #0001}
+.st b{font-size:20px;color:var(--n);display:block}table{width:100%;border-collapse:collapse;font-size:12px}th,td{padding:6px;border-bottom:1px solid var(--b);text-align:left}th{background:#eef2fb}
+.sc{overflow-x:auto}.warn{background:#fef3c7;border:1px solid #f59e0b;padding:8px;border-radius:6px;margin-bottom:10px;color:#92400e}
+.row{display:flex;gap:6px;margin-top:6px}.row>*{flex:1}.row .n{flex:0}
+#modal{position:fixed;inset:0;background:#0008;display:none;align-items:flex-start;justify-content:center;overflow:auto;padding:14px;z-index:9}
+#modal .box{background:#fff;border-radius:10px;padding:16px;max-width:680px;width:100%}
+#login{max-width:340px;margin:8vh auto}.cap{font:900 22px monospace;letter-spacing:6px;background:#e2e8f0;padding:6px;text-align:center;border-radius:6px;user-select:none;text-decoration:line-through wavy #94a3b8}
+.pw{position:relative}.pw span{position:absolute;right:10px;top:8px;cursor:pointer}
+@media print{header,nav,.np,button{display:none!important}body.pm main{display:none}body.pm #modal{position:static;background:none;padding:0;display:block}body.pm #modal .box{box-shadow:none;padding:0;max-width:none}}
+
+body{background:linear-gradient(180deg,#eaf0fb 0,#f6f8fd 260px,#f4f7fc);min-height:100vh}
+header{position:sticky;top:0;z-index:5;background:linear-gradient(90deg,#fff,#eef3ff);box-shadow:0 2px 14px #1e3a8a22;animation:down .5s ease}
+header img{border-radius:6px;transition:transform .4s}header img:hover{transform:rotate(-6deg) scale(1.08)}
+nav{position:sticky;top:53px;z-index:4;background:linear-gradient(90deg,#0f172a,#16245a);box-shadow:0 4px 12px #0f172a33;scrollbar-width:none}
+nav a{position:relative;transition:.25s;border-radius:8px 8px 0 0}nav a:hover{background:#ffffff14;color:#fff}
+nav a::after{content:"";position:absolute;left:50%;bottom:0;height:3px;width:0;background:#38bdf8;transition:.3s;transform:translateX(-50%);border-radius:3px}
+nav a:hover::after{width:70%}nav a.on{box-shadow:0 -3px 10px #0002}nav a.on::after{display:none}
+main.fade>*{animation:up .5s cubic-bezier(.2,.8,.2,1) both}main.fade>*:nth-child(2){animation-delay:.07s}main.fade>*:nth-child(3){animation-delay:.14s}main.fade>*:nth-child(4){animation-delay:.21s}
+.card{border:1px solid #e5ebf7;border-top:3px solid var(--n);transition:transform .25s,box-shadow .25s}.card:hover{transform:translateY(-2px);box-shadow:0 8px 22px #1e3a8a1c}
+h3{padding-bottom:8px;border-bottom:1px dashed var(--b)}h3>span{display:flex;gap:6px}
+.st{position:relative;overflow:hidden;border:1px solid #e5ebf7;border-left:5px solid var(--n);animation:pop .6s cubic-bezier(.2,.9,.3,1.3) both;transition:transform .25s,box-shadow .25s}
+.st:hover{transform:translateY(-4px) scale(1.02);box-shadow:0 10px 24px #1e3a8a26}.st::after{content:"";position:absolute;right:-18px;top:-18px;width:60px;height:60px;border-radius:50%;background:#1e3a8a12}
+.st:nth-child(2){border-left-color:#0ea5e9}.st:nth-child(3){border-left-color:#dc2626}.st:nth-child(4){border-left-color:#16a34a}.st:nth-child(5){border-left-color:#f59e0b}.st:nth-child(6){border-left-color:#7c3aed}
+.st b{font-size:24px}
+button{position:relative;overflow:hidden;transition:transform .15s,box-shadow .2s,filter .2s;box-shadow:0 3px 8px #1e3a8a33}
+button:hover{transform:translateY(-2px);filter:brightness(1.1);box-shadow:0 6px 14px #1e3a8a44}button:active{transform:scale(.96)}
+button.s,button.x{box-shadow:none}button.s:hover{background:#d6e0f6}button.x:hover{background:#fecaca}
+button.xl{background:linear-gradient(90deg,#15803d,#16a34a);color:#fff;padding:5px 10px;box-shadow:0 3px 8px #16a34a44}
+input:focus,select:focus{outline:0;border-color:#2748c4;box-shadow:0 0 0 3px #2748c426}input,select{transition:.2s}
+tr{transition:background .2s}tbody tr:hover,table tr:hover td{background:#f1f5fd}table tr{animation:fadein .4s both}th{color:var(--n);font-size:11px;text-transform:uppercase;letter-spacing:.4px}
+.sc{border-radius:8px;border:1px solid var(--b)}.sc table{margin:0}
+#modal{backdrop-filter:blur(3px);animation:fadein .25s}#modal .box{animation:pop .35s cubic-bezier(.2,.9,.3,1.2);box-shadow:0 20px 50px #0005}
+#login{animation:pop .7s cubic-bezier(.2,.9,.3,1.2);border-top:4px solid var(--n);box-shadow:0 18px 50px #1e3a8a33;padding:20px}
+#login h3{font-size:18px}.cap{background:linear-gradient(90deg,#dbeafe,#e0e7ff);color:var(--n)}
+.warn{animation:pulse 2s infinite}
+#toast{position:fixed;left:50%;bottom:22px;transform:translate(-50%,80px);background:#0f172a;color:#fff;padding:10px 18px;border-radius:30px;z-index:20;opacity:0;transition:.4s;font-weight:600}#toast.on{transform:translate(-50%,0);opacity:1}
+@keyframes up{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:none}}@keyframes down{from{opacity:0;transform:translateY(-100%)}to{opacity:1;transform:none}}
+@keyframes pop{from{opacity:0;transform:scale(.88)}to{opacity:1;transform:none}}@keyframes fadein{from{opacity:0}to{opacity:1}}
+@keyframes pulse{50%{box-shadow:0 0 0 6px #f59e0b33}}
+@page{size:A4;margin:0}@media print{#toast{display:none}body{padding:10mm}.card{box-shadow:none;border:0;animation:none}}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+
+.rh{display:flex;align-items:center;gap:12px;padding:14px 16px;background:linear-gradient(120deg,#0f172a,#1e3a8a 60%,#2748c4);color:#fff;position:relative}
+.rh img{height:56px;width:56px;object-fit:contain;background:#fff;border-radius:50%;padding:3px}.rh h2{margin:0;font-size:17px;color:#fff;text-align:left;letter-spacing:.3px}.rh small{opacity:.85;font-size:10.5px;display:block;margin-top:3px;line-height:1.4}
+.rh::after{content:"";position:absolute;left:0;right:0;bottom:-1px;height:5px;background:repeating-linear-gradient(90deg,#38bdf8 0 14px,#fff0 14px 18px)}
+.rt{text-align:center;margin:14px 0 10px;position:relative}.rt span{display:inline-block;padding:5px 26px;border-radius:30px;background:#eef3ff;color:var(--n);font-weight:800;letter-spacing:3px;border:1px solid #c7d4f2}
+.rm{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:0 16px;position:relative}.rm div{background:#f5f8ff;border:1px solid #dbe3f0;border-radius:8px;padding:7px 9px}
+.rm small{display:block;color:#64748b;font-size:10px;text-transform:uppercase;letter-spacing:.5px}.rm b{color:var(--n);font-size:14px}
+.rs{margin:12px 16px 8px;padding:10px 12px;border-left:4px solid #38bdf8;background:linear-gradient(90deg,#f0f7ff,#fff);border-radius:0 8px 8px 0;line-height:1.7;position:relative}.rs b{color:var(--n)}
+.tot{display:flex;justify-content:space-between;align-items:center;margin:10px 16px 0;padding:10px 14px;border-radius:10px;background:linear-gradient(90deg,#1e3a8a,#2748c4);color:#fff;font-weight:700;position:relative}.tot b{font-size:21px}
+.wd{margin:6px 16px 0;font-style:italic;color:#475569;font-size:12px;position:relative}
+.rf{display:flex;justify-content:space-between;align-items:flex-end;margin:14px 16px 14px;gap:10px;position:relative}.rf img{height:78px;border:1px solid #dbe3f0;border-radius:8px;padding:3px}
+.rf .sg{text-align:center;min-width:130px;border-top:1.5px solid #1e3a8a;padding-top:4px;font-size:11px}
+.stamp{position:absolute;right:22px;bottom:96px;z-index:2;border:3px double #16a34a;color:#16a34a;font-weight:900;letter-spacing:3px;padding:4px 14px;border-radius:8px;transform:rotate(-14deg);opacity:.75;font-size:20px;animation:stamp .5s .3s both}
+.stamp.c{border-color:#dc2626;color:#dc2626}.rn{text-align:center;font-size:10px;color:#94a3b8;padding:0 0 10px;position:relative}
+@keyframes stamp{from{opacity:0;transform:rotate(-14deg) scale(2.2)}to{opacity:.75;transform:rotate(-14deg) scale(1)}}
+@media(max-width:480px){.rm{grid-template-columns:1fr 1fr}.rh h2{font-size:14px}}
+
+header{position:static;padding:16px 22px;gap:18px;background:linear-gradient(100deg,#0f1f5c,#1e3a8a 55%,#2748c4);border-bottom:4px solid #38bdf8;color:#fff}
+header img{height:74px;background:#fff;padding:4px;border-radius:12px;box-shadow:0 4px 14px #0004}
+header b{color:#fff;font-size:clamp(17px,3.2vw,28px);letter-spacing:.4px;line-height:1.15;text-shadow:0 2px 6px #0005}
+header small{color:#c7d6ff;font-size:clamp(11px,1.8vw,14px);margin-top:4px}
+header #lo{background:#fff2;color:#fff;border:1px solid #fff5;box-shadow:none}
+nav{top:0}
+
+*{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+
+/* ===== polish v2 ===== */
+body{font:14px/1.45 "Segoe UI",system-ui,-apple-system,sans-serif;background:radial-gradient(circle at 10% 0,#dbe7ff 0,transparent 38%),radial-gradient(circle at 95% 12%,#e0f2fe 0,transparent 34%),linear-gradient(180deg,#f3f6fc,#eef2fa);background-attachment:fixed}
+::-webkit-scrollbar{height:6px;width:8px}::-webkit-scrollbar-thumb{background:#1e3a8a55;border-radius:6px}
+main{padding:16px 14px 40px}
+nav{padding:6px 8px 0;gap:4px;border-bottom:1px solid #ffffff22}
+nav a{padding:10px 14px;font-size:13px;border-radius:10px 10px 0 0;color:#b9c6ea}
+nav a.on{background:linear-gradient(180deg,#fff,#f3f7ff);color:var(--n);border-bottom:0;box-shadow:0 -4px 14px #0003}
+.card{border-radius:16px;padding:18px;border:1px solid #e3eaf8;border-top:0;box-shadow:0 4px 18px #1e3a8a14;position:relative;overflow:hidden}
+.card::before{content:"";position:absolute;left:0;right:0;top:0;height:4px;background:linear-gradient(90deg,#1e3a8a,#2748c4,#38bdf8)}
+h3{font-size:15px;font-weight:700;padding:2px 0 10px;margin-bottom:12px;border-bottom:1px solid #e6ecf8;letter-spacing:.2px}
+label{font-size:11.5px;color:#475569;letter-spacing:.2px;margin:10px 0 4px}
+input,select,textarea{padding:10px 11px;border:1.5px solid #d6deef;border-radius:10px;background:#fbfcff;font-size:13.5px}
+input:hover,select:hover{border-color:#9db2e6}input:focus,select:focus{background:#fff}
+button{border-radius:10px;padding:10px 15px;letter-spacing:.2px}
+button.w{padding:13px;font-size:14px;border-radius:12px;background:linear-gradient(90deg,#1e3a8a,#2748c4 60%,#2f6bff);box-shadow:0 6px 16px #1e3a8a44}
+button.s,button.x,button.xl{padding:6px 11px;font-size:12px;border-radius:8px}
+button.s{background:#eaf0ff;border:1px solid #d3defa}
+.st{border-radius:14px;padding:14px 16px;background:linear-gradient(135deg,#fff,#f4f8ff)}.st small{font-weight:600;color:#475569}
+.st b{font-size:26px;margin-top:6px;letter-spacing:-.3px}
+.sc{border-radius:12px;box-shadow:0 2px 10px #1e3a8a10}
+th{background:linear-gradient(180deg,#eef3ff,#e4ecfc);padding:9px 8px;white-space:nowrap}td{padding:9px 8px}
+.hero{display:flex;align-items:center;gap:14px;padding:16px 20px;margin-bottom:14px;border-radius:16px;color:#fff;background:linear-gradient(110deg,#0f1f5c,#1e3a8a 55%,#2f6bff);box-shadow:0 10px 26px #1e3a8a40;position:relative;overflow:hidden;animation:up .5s both}
+.hero::after{content:"";position:absolute;right:-40px;top:-60px;width:200px;height:200px;border-radius:50%;background:#ffffff14}
+.hero::before{content:"";position:absolute;right:90px;bottom:-70px;width:140px;height:140px;border-radius:50%;background:#38bdf822}
+.hero h2{margin:0;font-size:19px}.hero p{margin:3px 0 0;color:#c7d6ff;font-size:12.5px}.hero .em{font-size:38px;animation:float 3s ease-in-out infinite}
+.pill{display:inline-block;padding:2px 10px;border-radius:20px;background:#38bdf8;color:#0f172a;font-size:11px;font-weight:800;margin-left:6px;vertical-align:middle}
+@keyframes float{50%{transform:translateY(-6px)}}
+footer{text-align:center;color:#64748b;font-size:11.5px;padding:18px 10px 26px}footer b{color:var(--n)}
+#login{margin:7vh auto;max-width:380px;padding:26px 24px;border-radius:20px}
+#login::after{content:"🔐";position:absolute;right:18px;top:16px;font-size:26px;animation:float 3s ease-in-out infinite}
+#login h3{font-size:20px;border:0}#login small{color:#64748b}
+.cap{font-size:24px;border-radius:10px;border:1px dashed #9db2e6}
+@media(max-width:600px){header{padding:12px 14px;gap:12px}header img{height:56px}.hero h2{font-size:16px}.card{padding:14px;border-radius:14px}main{padding:12px 10px 34px}}
+@media print{.hero,footer{display:none!important}}
+
+/* ===== professional receipt ===== */
+.rc{background:#fff;color:#111;border:2px solid #1e3a8a;padding:2.5mm;position:relative;width:100%;max-width:190mm;margin:0 auto;font-size:12px;page-break-inside:avoid;break-inside:avoid}
+.rc.sum{page-break-inside:auto;break-inside:auto}
+.rc .inner{border:.6px solid #94a3b8;padding:5mm 6mm;position:relative;overflow:hidden}
+.rc .wm{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:54px;font-weight:900;color:#1e3a8a24;transform:rotate(-24deg);text-align:center;pointer-events:none;z-index:0}.rc .wm img{max-height:240px;opacity:.16}
+.rc .inner>*{position:relative;z-index:1}.rc .inner>.wm,.rc .inner>.dg{position:absolute}
+.rc .dg{inset:0;display:flex;align-items:center;justify-content:center;font:900 76px sans-serif;letter-spacing:6px;color:#dc262624;transform:rotate(-28deg);pointer-events:none;z-index:2}.rc .dg.c{color:#dc262638}
+.rc .hd{display:flex;align-items:center;gap:14px;border-bottom:2.5px solid #1e3a8a;padding-bottom:9px}.rc .hd img{height:66px;width:auto}
+.rc .hd .t{flex:1;text-align:center}.rc .hd h2{margin:0;color:#1e3a8a;font-size:20px;letter-spacing:.6px;text-transform:uppercase;line-height:1.2}.rc .hd small{display:block;color:#475569;font-size:10.5px;margin-top:2px}
+.rc .ttl{display:flex;justify-content:space-between;align-items:center;margin:11px 0}
+.rc .ttl h4{margin:0;font-size:14px;letter-spacing:4px;color:#fff;background:#1e3a8a;padding:6px 20px;border-radius:3px}
+.rc .tag{border:1.5px solid #1e3a8a;color:#1e3a8a;font-weight:800;padding:4px 12px;border-radius:3px;font-size:11px;letter-spacing:1.5px}
+.rc .info{width:100%;border-collapse:collapse;margin-bottom:11px}.rc .info td{padding:5px 8px;border:1px solid #cbd5e1;font-size:12px}.rc .info td.k{background:#f1f5f9;color:#475569;font-weight:600;width:19%;white-space:nowrap}
+.rc .fee{width:100%;border-collapse:collapse}.rc .fee th{background:#1e3a8a;color:#fff;padding:6px 8px;font-size:11px;text-align:left;letter-spacing:.5px}.rc .fee td{padding:6px 8px;border-bottom:1px solid #cbd5e1;font-size:12px}
+.rc .fee .r{text-align:right}.rc .fee .grand td{font-weight:800;font-size:14px;background:#eaf0ff;border-top:2px solid #1e3a8a;color:#1e3a8a}
+.rc .words{margin:10px 0;padding:6px 10px;border:1px solid #cbd5e1;border-left:4px solid #1e3a8a;background:#f8fafc;font-size:12px}
+.rc .foot{display:flex;justify-content:space-between;align-items:flex-end;margin-top:18px;gap:12px}.rc .foot img{height:80px;border:1px solid #94a3b8;padding:2px}.rc .foot small{display:block;max-width:300px;color:#475569;margin-top:3px}
+.rc .sig{text-align:center;min-width:150px;border-top:1px solid #111;padding-top:4px;font-size:11px;font-weight:600}
+.rc .note{font-size:9.5px;color:#64748b;border-top:1px dashed #94a3b8;margin-top:12px;padding-top:5px;text-align:center}
+.rc .two{display:flex;gap:12px;margin-bottom:10px}.rc .two>div{flex:1}.rc h5{margin:12px 0 5px;color:#1e3a8a;font-size:12px;letter-spacing:1px;text-transform:uppercase}
+.rc .big{margin:10px 0;padding:10px 14px;background:linear-gradient(90deg,#1e3a8a,#2748c4);color:#fff;border-radius:6px;display:flex;justify-content:space-between;font-size:15px;font-weight:700}
+.rc .fee.sm td,.rc .fee.sm th{padding:4px 6px;font-size:10.5px}
+@media print{.rc{max-width:none}body.pm .rc,.pg .rc:not(.sum){font-size:14.5px}body.pm .rc .inner,.pg .rc:not(.sum) .inner{padding:11mm 11mm 9mm}body.pm .rc .hd h2,.pg .rc:not(.sum) .hd h2{font-size:25px}body.pm .rc .hd img,.pg .rc:not(.sum) .hd img{height:84px}body.pm .rc .info td,body.pm .rc .fee td,.pg .rc:not(.sum) .info td,.pg .rc:not(.sum) .fee td{padding:9px 10px;font-size:14px}body.pm .rc .fee th,.pg .rc:not(.sum) .fee th{padding:9px 10px;font-size:12px}body.pm .rc .grand td,.pg .rc:not(.sum) .grand td{font-size:17px}body.pm .rc .foot,.pg .rc:not(.sum) .foot{margin-top:40px}body.pm .rc .words,.pg .rc:not(.sum) .words{font-size:14px;padding:10px 12px}}
+</style></head><body>
+<header><img id="hl" alt=""><div><b id="hn">College Receipt Portal</b><small id="ha"></small></div><button class="x np" id="lo" style="margin-left:auto;display:none" onclick="logout()">Logout</button></header>
+<nav id="nav"></nav><main id="app"></main><div id="toast"></div><div id="modal"><div class="box" id="mb"></div></div>
+<footer class="np"><div id="lim" style="margin-bottom:6px"></div>🏛 <b id="fn1"></b> · Digital Receipt Book · Data stays on this device (IndexedDB)</footer>
+<script>
+const $=s=>document.querySelector(s),H=h=>h==null?'':String(h).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const ULTRA_PW='ultra@gist'; // fixed in code: nobody can change it from the UI
+let dirty=false,db,S,ULTRA=false,tab='dash',editId=null,cap='',L={};
+/* ---------- IndexedDB ---------- */
+const idb=()=>new Promise(r=>{const q=indexedDB.open('gistReceipts',1);q.onupgradeneeded=()=>q.result.createObjectStore('kv');q.onsuccess=()=>{db=q.result;r()}});
+const get=k=>new Promise(r=>{const q=db.transaction('kv').objectStore('kv').get(k);q.onsuccess=()=>r(q.result)});
+const put=(k,v)=>new Promise(r=>{const t=db.transaction('kv','readwrite');t.objectStore('kv').put(v,k);t.oncomplete=r});
+const save=()=>{try{updLim()}catch(e){}dirty=true;put('dirty',true);return put('db',S)};
+const fresh=()=>({college:{name:'Gandhi Institute of Science and Technology',addr:'Rayagada, Odisha, India',phone:'',email:'',web:'',wmText:'GIST RAYAGADA',bank:'',logo:'',wmImg:'',qr:''},
+ pw:'admin123',books:[],receipts:[],students:[],limit:{from:'',to:'',max:0},
+ dd:{course:['Diploma','B.Tech'],sem:['1st Semester','2nd Semester','3rd Semester','4th Semester','5th Semester','6th Semester','7th Semester','8th Semester'],dept:['Computer Science & Engineering','Mechanical Engineering','Electrical Engineering','Civil Engineering'],year:['2025-26','2026-27'],head:['Admission Fees','Tuition Fees','Laboratory Fees','Library Fees','Exam Fees','Hostel Fees','Caution Money','Fine'],mode:['Cash','UPI / Online','Cheque / DD']}});
+/* ---------- helpers ---------- */
+const today=()=>new Date().toISOString().slice(0,10),tot=r=>r.items.reduce((a,i)=>a+ +i.amt,0),inr=n=>'₹'+(+n).toLocaleString('en-IN');
+const opts=(a,v)=>a.map(x=>`<option ${x==v?'selected':''}>${H(x)}</option>`).join('');
+const askPw=()=>{const p=prompt('Enter action password');if(p===S.pw||(ULTRA&&p===ULTRA_PW))return true;if(p!==null)alert('Wrong password');return false};
+const dl=(name,txt,type='text/plain')=>{const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([txt],{type}));a.download=name;a.click()};
+const csv=rows=>rows.map(r=>r.map(c=>'"'+String(c??'').replace(/"/g,'""')+'"').join(',')).join('\n');
+const file2url=f=>new Promise(r=>{if(!f)return r('');const fr=new FileReader();fr.onload=()=>r(fr.result);fr.readAsDataURL(f)});
+const bookOf=id=>S.books.find(b=>b.id==id);
+const valid=r=>!r.cancelled;
+function skipped(){let n=0;S.receipts.forEach(r=>n+=(r.skipped||[]).length);return n}
+function brand(){updLim();$('#fn1').textContent=S.college.name;const c=S.college;$('#hn').textContent=c.name;$('#ha').textContent=c.addr;$('#hl').src=c.logo||'';$('#hl').style.display=c.logo?'':'none';document.title=c.name+' - Receipts'}
+/* ---------- login ---------- */
+function loginView(){cap=Math.random().toString(36).slice(2,7).toUpperCase();$('#nav').innerHTML='';$('#lo').style.display='none';
+$('#app').innerHTML=`<div id="login" class="card"><h3>Login</h3><label>User ID</label><input id="u" autocomplete="username"><label>Password</label><div class="pw"><input id="p" type="password"><span onclick="p.type=p.type=='password'?'text':'password'">👁</span></div>
+<label>Captcha</label><div class="cap">${cap}</div><input id="c" placeholder="Type captcha" style="margin-top:6px"><button class="w" onclick="login()">Login</button><p id="le" style="color:#dc2626"></p><small>Admin ID: admin</small></div>`}
+function login(){const u=$('#u').value.trim(),p=$('#p').value,c=$('#c').value.trim().toUpperCase();
+ if(c!==cap){$('#le').textContent='Wrong captcha';return loginView2()}
+ if(u==='admin'&&p===S.pw)ULTRA=false;else if(u==='ultra'&&p===ULTRA_PW)ULTRA=true;else{$('#le').textContent='Invalid ID or password';return loginView2()}
+ sessionStorage.s=ULTRA?'u':'a';start()}
+const loginView2=()=>{const m=$('#le').textContent;loginView();$('#le').textContent=m};
+function doLogout(){$('#modal').style.display='none';sessionStorage.removeItem('s');ULTRA=false;loginView()}
+function logout(){if(!dirty)return doLogout();$('#mb').innerHTML=`<h3>⚠ Download a backup before you logout</h3><p>You have added or changed data since your last backup. If this device's browser data is cleared, that work can be lost.</p><div class="row" style="flex-wrap:wrap"><button onclick="expBak().then(doLogout)">💾 Download backup & logout</button><button class="x" onclick="doLogout()">Logout without backup</button><button class="s" onclick="$('#modal').style.display='none'">Stay</button></div>`;$('#modal').style.display='flex'}
+function start(){$('#lo').style.display='';tab='dash';nav();view()}
+const TABS=[['dash','📊 Dashboard'],['add','📝 Add Receipt'],['search','🔍 Search & Records'],['books','📚 Receipt Books'],['stud','👥 Students DB'],['dd','⚙️ Dropdown Manager'],['col','🏛 College Details'],['bak','💾 Backup & Restore'],['sec','🔐 Security']];
+function nav(){const t=TABS.concat(ULTRA?[['ultra','⚡ Ultra']]:[]);$('#nav').innerHTML=t.map(([k,v])=>`<a class="${k==tab?'on':''}" onclick="tab='${k}';if(tab!='add')editId=null;nav();view()">${v}</a>`).join('')}
+function view(){const f=V[tab],m=$('#app');m.classList.remove('fade');m.innerHTML=f();void m.offsetWidth;m.classList.add('fade');if(A[tab])A[tab]()}
+function toast(t){const e=$('#toast');e.textContent=t;e.classList.add('on');clearTimeout(toast.t);toast.t=setTimeout(()=>e.classList.remove('on'),2500)}
+function counters(){document.querySelectorAll('.st b[data-n]').forEach(e=>{const t=+e.dataset.n,m=e.dataset.m,s=performance.now();(function f(n){const p=Math.min(1,(n-s)/900),v=Math.round(t*(1-Math.pow(1-p,3)));e.textContent=m?inr(v):v;if(p<1)requestAnimationFrame(f)})(s)})}
+/* ---------- Excel export ---------- */
+const xb=f=>`<button class="xl np" onclick="${f}">📊 Excel</button>`;
+function xl(name,sheets){if(typeof XLSX==='undefined'){dl(name+'.csv',csv(sheets[0][1]),'text/csv');return toast('Excel library offline - saved as CSV')}
+ const wb=XLSX.utils.book_new();sheets.forEach(([n,rows])=>{const ws=XLSX.utils.aoa_to_sheet(rows);ws['!cols']=rows[0].map((_,c)=>({wch:Math.min(40,Math.max(9,...rows.map(r=>String(r[c]??'').length+2)))}));XLSX.utils.book_append_sheet(wb,ws,n.slice(0,30))});
+ XLSX.writeFile(wb,name+'-'+today()+'.xlsx');toast('📊 Excel downloaded')}
+const RH=['Book','Serial','Date','Student','Roll','Course','Branch','Mode','UTR/Ref','Particulars','Total (INR)','Status'];
+const rr=r=>[bookOf(r.book).sl,r.serial,r.date,r.name,r.roll,r.course,r.branch,r.mode,r.utr||'',r.items.map(i=>i.head+' ['+i.sem+'] '+i.amt).join('; '),tot(r),r.cancelled?'Cancelled':'Valid'];
+const rtab=R=>[RH].concat(R.map(rr),[['','','','','','','','','','TOTAL (valid)',R.filter(valid).reduce((a,r)=>a+tot(r),0),'']]);
+function xlAll(){xl('all-receipts',[['Receipts',rtab(S.receipts)]])}
+function xlRecords(){xl('receipts-filtered',[['Receipts',rtab(L.R||[])]])}
+function xlBooks(){xl('receipt-books',[['Books',[['Sl','Issued','From','To','Staff','Receipts used','Cancelled','Collection (INR)']].concat(S.books.map(b=>{const R=S.receipts.filter(r=>r.book==b.id);return [b.sl,b.date,b.from,b.to,b.staff,R.length,R.filter(r=>r.cancelled).length,R.filter(valid).reduce((a,r)=>a+tot(r),0)]}))]])}
+function xlBook(id){const b=bookOf(id),R=S.receipts.filter(r=>r.book==id).sort((a,c)=>a.serial-c.serial),v=R.filter(valid);
+ xl('book-'+b.sl,[['Summary',[['Book',b.sl],['Range',b.from+'-'+b.to],['Staff',b.staff],['Receipts',R.length],['Cancelled',R.length-v.length],['Total collection (INR)',v.reduce((a,r)=>a+tot(r),0)]]],['Receipts',rtab(R)]])}
+function xlStud(){xl('students',[['Students',[['Roll','Name','Course','Academic year','Branch']].concat(stuF().map(s=>[s.roll,s.name,s.course,s.year,s.branch]))]])}
+function xlRep(){xl('report',[['Report',L.rep||[['No data']]]])}
+const pbtn=`<button class="s np" onclick="printPage()">🖨 Print / PDF</button>`;
+/* ---------- views ---------- */
+const V={},A={};
+A.dash=counters;
+V.dash=()=>{const R=S.receipts,v=R.filter(valid),t=today();const lim=limitMsg();
+ const hr=new Date().getHours(),gr=hr<12?'Good morning':hr<17?'Good afternoon':'Good evening';
+ return `${lim}<div class="hero"><div class="em">👋</div><div><h2>${gr}, ${ULTRA?'Ultra Admin':'Admin'}<span class="pill">${ULTRA?'ULTRA':'NORMAL'}</span></h2><p>${new Date().toLocaleDateString('en-IN',{weekday:'long',day:'numeric',month:'long',year:'numeric'})} · ${S.receipts.filter(r=>r.date==today()).length} receipts issued today</p></div></div><h3>Dashboard <span>${xb('xlAll()')}${pbtn}</span></h3><div class="cards">${[['Total books issued',S.books.length],['Total issued receipts',R.length],['Cancelled receipts',R.filter(r=>r.cancelled).length],['Total collection',inr(v.reduce((a,r)=>a+tot(r),0))],["Today's collections",inr(v.filter(r=>r.date==t).reduce((a,r)=>a+tot(r),0))],['Skipped receipts',skipped()]].map(([a,b],i)=>`<div class="st" style="animation-delay:${i*80}ms"><small>${['📚','🧾','🚫','💰','📅','⏭'][i]} ${a}</small><b data-n="${String(b).replace(/[^0-9.]/g,'')}" data-m="${String(b)[0]=='₹'?1:''}">${b}</b></div>`).join('')}</div>
+ <div class="card" style="margin-top:12px"><h3>Reports</h3><div class="g"><div><label>Type</label><select id="rt"><option>Daily</option><option>Weekly</option><option>Monthly</option><option>Yearly</option></select></div><div><label>Reference date</label><input type="date" id="rd" value="${t}"></div></div><button class="w np" onclick="report()">Generate Report</button><div id="rp" class="sc"></div></div>`};
+function limInfo(){const l=S.limit||{},n=(l.from&&l.to)?S.receipts.filter(r=>r.date>=l.from&&r.date<=l.to).length:S.receipts.length;return{n,max:+l.max||0,l}}
+function updLim(){const e=$('#lim');if(!e)return;const{n,max,l}=limInfo();
+ e.innerHTML=max?`<span style="display:inline-block;padding:5px 16px;border-radius:20px;font-weight:800;font-size:13px;background:${n>=max?'#fee2e2':'#dcfce7'};color:${n>=max?'#b91c1c':'#15803d'}">🧾 Receipts added: ${n} / ${max}${n>=max?' — LIMIT REACHED':''}</span>${l.from?`<div style="margin-top:3px">Period: ${fd(l.from)} to ${fd(l.to)}</div>`:''}${n>=max?'<div style="color:#b91c1c;font-weight:700">Please pay the annual maintenance fee to continue issuing receipts.</div>':''}`:'<span>🧾 Receipt limit: not set</span>'}
+function limitMsg(){const l=S.limit;if(!l.max)return'';const n=S.receipts.filter(r=>r.date>=l.from&&r.date<=l.to).length;
+ return n>=l.max?`<div class="warn">⚠ Annual receipt limit (${l.max}) reached for ${l.from} to ${l.to}. No more receipts can be added. Please pay the annual maintenance fee.</div>`:''}
+
+V.add=()=>{const r=editId?S.receipts.find(x=>x.id==editId):null,D=S.dd;
+ const bk=S.books.map(b=>`<option value="${b.id}" ${r&&r.book==b.id?'selected':''}>${b.sl} (${b.from}-${b.to}) - Staff: ${H(b.staff)}</option>`).join('');
+ return `${limitMsg()}<div class="card"><h3>${r?'Edit Receipt (Book '+bookOf(r.book).sl+' / '+r.serial+')':'Issue New Fee Receipt'}<a href="#" onclick="editId=null;view();return false" style="font-size:11px">Reset Form</a></h3>
+ <div class="g"><div><label>Receipt Book Number</label><select id="fb" onchange="autoSerial()">${bk}</select></div>
+ <div><label>Serial Number</label><input id="fs" type="number" ${r?'readonly':''} value="${r?r.serial:''}"></div>
+ <div><label>Issue Date</label><input id="fd" type="date" value="${r?r.date:today()}"></div><div><label>Payment Mode</label><select id="fm">${opts(D.mode,r&&r.mode)}</select></div>
+ <div><label>Course</label><select id="fc">${opts(D.course,r&&r.course)}</select></div><div><label>Branch / Department</label><select id="fdp">${opts(D.dept,r&&r.branch)}</select></div>
+ <div><label>Roll / ID Number (auto-fills name)</label><input id="fr" list="rl" autocomplete="off" value="${H(r&&r.roll)}" oninput="fillName()" onchange="fillName()"><datalist id="rl">${S.students.map(s=>`<option value="${H(s.roll)}">${H(s.name)}</option>`).join('')}</datalist><small id="fh" style="font-weight:600"></small></div><div><label>Student Full Name</label><input id="fn" value="${H(r&&r.name)}"></div></div>
+ <div id="skw" style="display:none"><label>Reason for skipping serial number (mandatory)</label><input id="fsk"></div>
+ <label>Transaction Reference / UTR / DD No.</label><input id="fu" value="${H(r&&r.utr)}">
+ <h3 style="margin-top:12px">Fee Heads, Semester & Amount <button class="s" onclick="addItem()">+ Add Item</button></h3><div id="its"></div>
+ 
+ <button class="w" onclick="saveR()">${r?'Update Receipt (password)':'Save & View Receipt Voucher'}</button></div>`};
+A.add=()=>{const r=editId&&S.receipts.find(x=>x.id==editId);(r?r.items:[{}]).forEach(addItem);if(!r)autoSerial();else fillName()};
+function addItem(i={}){const D=S.dd,d=document.createElement('div');d.className='row';
+ d.innerHTML=`<select class="ih">${opts(D.head,i.head)}</select><select class="is">${opts(D.sem,i.sem)}</select><input class="ia" type="number" placeholder="Amount (₹)" value="${i.amt||''}"><button class="x n" onclick="this.parentNode.remove()">×</button>`;$('#its').appendChild(d)}
+function expected(b){const u=S.receipts.filter(r=>r.book==b.id).map(r=>+r.serial),sk=S.receipts.filter(r=>r.book==b.id).flatMap(r=>r.skipped||[]);return Math.max(b.from-1,...u,...sk)+1}
+function autoSerial(){if(editId)return;const b=bookOf($('#fb').value);if(!b)return;$('#fs').value=expected(b);$('#fs').oninput=()=>{const e=expected(b);$('#skw').style.display=+$('#fs').value>e?'':'none'}}
+function fillName(){const v=$('#fr').value.trim().toLowerCase(),h=$('#fh'),st=v&&S.students.find(x=>String(x.roll).toLowerCase()==v);
+ if(!st){h.style.color='#b45309';h.textContent=v?'Not in Students DB - type the name manually':'';return}
+ $('#fn').value=st.name;[['#fc',st.course],['#fdp',st.branch]].forEach(([q,x])=>{const e=$(q);if(x){if(![...e.options].some(o=>o.value==x))e.add(new Option(x,x));e.value=x}});
+ h.style.color='#16a34a';h.textContent='✔ '+st.name+' | '+st.course+' | '+st.branch+' | '+st.year}
+function saveR(){const b=bookOf($('#fb').value);if(!b)return alert('Add a receipt book first');
+ const sn=+$('#fs').value,items=[...document.querySelectorAll('#its .row')].map(r=>({head:r.querySelector('.ih').value,sem:r.querySelector('.is').value,amt:+r.querySelector('.ia').value})).filter(i=>i.amt>0);
+ if(!$('#fn').value.trim()||!items.length)return alert('Enter student name and at least one amount');
+ const o={book:b.id,serial:sn,date:$('#fd').value,mode:$('#fm').value,course:$('#fc').value,branch:$('#fdp').value,roll:$('#fr').value.trim(),name:$('#fn').value.trim(),utr:$('#fu').value.trim(),items};
+ if(editId){if(!askPw())return;const r=S.receipts.find(x=>x.id==editId);Object.assign(r,o);r.edited=new Date().toISOString();save();editId=null;showR(r.id);tab='search';nav();view();return}
+ {const li=limInfo();if(li.max&&li.n>=li.max)return alert('⛔ Annual receipt limit reached ('+li.n+' / '+li.max+').\nNo more receipts can be added.\nPlease pay the annual maintenance fee to continue.')}
+ if(sn<b.from||sn>b.to)return alert('Serial must be within '+b.from+' to '+b.to);
+ if(S.receipts.some(r=>r.book==b.id&&r.serial==sn))return alert('This serial is already used');
+ const e=expected(b);if(sn>e){const rs=$('#fsk').value.trim();if(!rs)return alert('Reason is mandatory when skipping a serial');o.skipped=[];for(let i=e;i<sn;i++)o.skipped.push(i);o.skipReason=rs}
+ o.id=Date.now();o.created=new Date().toISOString();S.receipts.push(o);save();showR(o.id);view()}
+function words(n){n=Math.round(n);if(!n)return'Zero';const a=['','One','Two','Three','Four','Five','Six','Seven','Eight','Nine','Ten','Eleven','Twelve','Thirteen','Fourteen','Fifteen','Sixteen','Seventeen','Eighteen','Nineteen'],b=['','','Twenty','Thirty','Forty','Fifty','Sixty','Seventy','Eighty','Ninety'];
+ const t2=x=>x<20?a[x]:b[x/10|0]+(x%10?' '+a[x%10]:''),t3=x=>(x>99?a[x/100|0]+' Hundred'+(x%100?' ':''):'')+(x%100?t2(x%100):'');
+ const cr=n/1e7|0,lk=(n/1e5|0)%100,th=(n/1e3|0)%100,rs=n%1000;return[cr&&t3(cr)+' Crore',lk&&t2(lk)+' Lakh',th&&t2(th)+' Thousand',rs&&t3(rs)].filter(Boolean).join(' ')}
+const fd=d=>String(d).split('-').reverse().join('/');
+function words(n){n=Math.round(n);if(!n)return'Zero';const a='One Two Three Four Five Six Seven Eight Nine Ten Eleven Twelve Thirteen Fourteen Fifteen Sixteen Seventeen Eighteen Nineteen'.split(' '),t=' , Twenty Thirty Forty Fifty Sixty Seventy Eighty Ninety'.split(' ');
+ const two=x=>x<20?a[x-1]||'':t[Math.floor(x/10)]+(x%10?' '+a[x%10-1]:'');let o='';
+ [[1e7,'Crore'],[1e5,'Lakh'],[1e3,'Thousand'],[100,'Hundred']].forEach(([d,w])=>{const q=Math.floor(n/d);if(q){o+=(q<100||d==100?two(q):words(q))+' '+w+' ';n%=d}});return(o+(n?two(n):'')).trim()}
+function rcHTML(r,dup){const c=S.college,b=bookOf(r.book),tag=r.cancelled?'CANCELLED':dup?'DUPLICATE COPY':'ORIGINAL';
+ return `<div class="rc"><div class="inner"><div class="wm">${c.wmImg?`<img src="${c.wmImg}">`:H(c.wmText)}</div>${r.cancelled||dup?`<div class="dg ${r.cancelled?'c':''}">${r.cancelled?'CANCELLED':'DUPLICATE'}</div>`:''}
+ <div class="hd">${c.logo?`<img src="${c.logo}">`:''}<div class="t"><h2>${H(c.name)}</h2><small>${H(c.addr)}</small><small>${[c.phone&&'Ph: '+H(c.phone),c.email&&H(c.email),c.web&&H(c.web)].filter(Boolean).join(' &nbsp;|&nbsp; ')}</small></div></div>
+ <div class="ttl"><h4>FEE RECEIPT</h4><span class="tag">${tag}</span></div>
+ <table class="info"><tr><td class="k">Receipt No.</td><td><b>${r.serial}</b> &nbsp;(Book ${b.sl})</td><td class="k">Date</td><td><b>${r.date}</b></td></tr>
+ <tr><td class="k">Received from</td><td colspan="3"><b>${H(r.name)}</b></td></tr>
+ <tr><td class="k">Roll / ID No.</td><td>${H(r.roll)||'-'}</td><td class="k">Course</td><td>${H(r.course)}</td></tr>
+ <tr><td class="k">Branch</td><td colspan="3">${H(r.branch)}</td></tr>
+ <tr><td class="k">Payment mode</td><td>${H(r.mode)}</td><td class="k">Ref / UTR</td><td>${H(r.utr)||'-'}</td></tr></table>
+ <table class="fee"><tr><th style="width:36px">#</th><th>Particulars</th><th>Semester</th><th class="r" style="width:110px">Amount</th></tr>${r.items.map((i,k)=>`<tr><td>${k+1}</td><td>${H(i.head)}</td><td>${H(i.sem)}</td><td class="r">${inr(i.amt)}</td></tr>`).join('')}<tr class="grand"><td colspan="3" class="r">TOTAL</td><td class="r">${inr(tot(r))}</td></tr></table>
+ <div class="words">Amount in words: <b>Rupees ${words(tot(r))} Only</b></div>
+ ${r.cancelled?`<div class="words" style="background:#fee2e2;border-color:#dc2626;color:#991b1b">Cancelled on ${(r.cancelledAt||'').slice(0,10)} — Reason: ${H(r.cancelReason||'-')}</div>`:''}
+ <div class="foot"><div>${c.qr?`<img src="${c.qr}"><br>`:''}${c.bank?`<small>${H(c.bank)}</small>`:''}</div><div class="sig">Authorised Signatory<br><span style="font-weight:400">${H(b.staff)}</span></div></div>
+ <div class="note">This is a computer-generated receipt. Fees once paid are non-refundable.${dup?' Duplicate copy issued on '+today()+'.':''}</div></div></div>`}
+function showR(id,dup){const r=S.receipts.find(x=>x.id==id);$('#mb').innerHTML=rcHTML(r,dup)+`<div class="row np"><button onclick="printModal()">🖨 Print</button>${dup?'':`<button class="s" onclick="dupR(${r.id})">📄 Duplicate copy</button>`}<button class="s" onclick="$('#modal').style.display='none'">Close</button></div>`;$('#modal').style.display='flex'}
+function printModal(){document.body.classList.add('pm');print();setTimeout(()=>document.body.classList.remove('pm'),500)}
+function dupR(id){const r=S.receipts.find(x=>x.id==id);r.dups=(r.dups||0)+1;r.lastDup=today();save();showR(id,true);toast('Duplicate copy #'+r.dups+' generated')}
+function cancelR(id){const r=S.receipts.find(x=>x.id==id);if(r.cancelled)return alert('Already cancelled');const why=prompt('Reason for cancelling receipt '+bookOf(r.book).sl+'/'+r.serial+' (mandatory)');if(!why||!why.trim())return;if(!askPw())return;r.cancelled=true;r.cancelReason=why.trim();r.cancelledAt=new Date().toISOString();save();doSearch();toast('🚫 Receipt cancelled')}
+function restoreR(id){if(!ULTRA)return;if(prompt('Enter ULTRA password to restore this receipt')!==ULTRA_PW)return alert('Wrong password');const r=S.receipts.find(x=>x.id==id);r.cancelled=false;delete r.cancelReason;save();doSearch();toast('Receipt restored')}
+V.search=()=>{const D=S.dd;return `<div class="card np"><h3>Search Receipts</h3><div class="g"><div><label>Name / Roll no.</label><input id="q"></div><div><label>Book no.</label><input id="qb"></div><div><label>Serial no.</label><input id="qs" type="number"></div>
+ <div><label>Course</label><select id="qc"><option value="">All</option>${opts(D.course)}</select></div><div><label>Department</label><select id="qd"><option value="">All</option>${opts(D.dept)}</select></div><div><label>Payment mode</label><select id="qm"><option value="">All</option>${opts(D.mode)}</select></div><div><label>Purpose (fee head)</label><select id="qh"><option value="">All</option>${opts(D.head)}</select></div>
+ <div><label>From date</label><input id="qf" type="date"></div><div><label>To date</label><input id="qt" type="date"></div></div><button class="w" onclick="doSearch()">Search</button></div><div class="card"><h3>Records <span>${xb('xlRecords()')}<button class="s np" onclick="pdfRecords()">📄 PDF</button></span></h3><div id="sr" class="sc"></div></div>`};
+A.search=()=>doSearch();
+function doSearch(){const q=$('#q').value.toLowerCase(),f=(i)=>$(i).value,hv=f('#qh'),amt=r=>hv?r.items.filter(i=>i.head==hv).reduce((a,i)=>a+ +i.amt,0):tot(r);
+ const R=S.receipts.filter(r=>(!q||r.name.toLowerCase().includes(q)||String(r.roll).toLowerCase().includes(q))&&(!f('#qb')||bookOf(r.book).sl==f('#qb'))&&(!f('#qs')||r.serial==f('#qs'))&&(!f('#qc')||r.course==f('#qc'))&&(!f('#qd')||r.branch==f('#qd'))&&(!f('#qm')||r.mode==f('#qm'))&&(!hv||r.items.some(i=>i.head==hv))&&(!f('#qf')||r.date>=f('#qf'))&&(!f('#qt')||r.date<=f('#qt'))).sort((a,b)=>b.created>a.created?1:-1);
+ L.R=R;$('#sr').innerHTML=`<p>${R.length} records · ${hv?H(hv)+' collection':'Total'}: <b>${inr(R.filter(valid).reduce((a,r)=>a+amt(r),0))}</b></p><table><tr><th>Book/Sl</th><th>Date</th><th>Name</th><th>Roll</th><th>Purpose</th><th>Mode</th><th>${hv?'Amount ('+H(hv)+')':'Amount'}</th><th class="np">Actions</th></tr>${R.map(r=>`<tr style="${r.cancelled?'background:#fff1f2':''}"><td>${bookOf(r.book).sl}/${r.serial}${r.cancelled?' <span class="pill" style="background:#fecaca;color:#991b1b;margin:0">CANCELLED</span>':''}${r.dups?' <small title="duplicate copies issued">📄'+r.dups+'</small>':''}</td><td>${r.date}</td><td>${H(r.name)}</td><td>${H(r.roll)}</td><td>${[...new Set(r.items.map(i=>i.head))].map(H).join(', ')}</td><td>${H(r.mode)}</td><td style="${r.cancelled?'text-decoration:line-through;opacity:.6':''}">${inr(amt(r))}</td><td class="np" style="white-space:nowrap"><button class="s" onclick="showR(${r.id})">👁 View</button> <button class="s" onclick="dupR(${r.id})">📄 Duplicate</button> <button class="s" onclick="stmt(decodeURIComponent('${enc(r.roll)}'))">🧾 Statement</button> <button class="s" onclick="if(askPw()){editId=${r.id};tab='add';nav();view()}">✏️ Edit</button> ${r.cancelled?(ULTRA?`<button class="s" onclick="restoreR(${r.id})">↩ Restore</button>`:''):`<button class="x" onclick="cancelR(${r.id})">🚫 Cancel</button>`}${ULTRA?` <button class="x" onclick="delR(${r.id})">🗑 Delete</button>`:''}</td></tr>`).join('')}</table>`}
+function delR(id){if(!ULTRA)return;const r=S.receipts.find(x=>x.id==id);if(!r||!confirm('Delete receipt '+bookOf(r.book).sl+'/'+r.serial+' of '+r.name+' permanently?'))return;
+ if(prompt('Enter the ULTRA password again to delete')!==ULTRA_PW)return alert('Wrong password. Receipt NOT deleted.');
+ (S.deletedLog=S.deletedLog||[]).push({at:new Date().toISOString(),book:bookOf(r.book).sl,serial:r.serial,name:r.name,roll:r.roll,amount:tot(r)});
+ S.receipts=S.receipts.filter(x=>x.id!=id);save();doSearch();toast('🗑 Receipt deleted')}
+V.books=()=>`<div class="card np"><h3>Add Receipt Book</h3><div class="g"><div><label>Book Sl. No.</label><input id="bs" type="number" value="${S.books.length+1}"></div><div><label>Date of issue</label><input id="bd" type="date" value="${today()}"></div><div><label>Range from</label><input id="bf" type="number" value="1"></div><div><label>Range to</label><input id="bt" type="number" value="100"></div><div><label>Assigned staff</label><input id="bst"></div></div><button class="w" onclick="addBook()">Register Book (password)</button></div>
+ <div class="card"><h3>Receipt Books <span>${xb('xlBooks()')}${pbtn}</span></h3><div class="sc"><table><tr><th>Sl</th><th>Issued</th><th>Range</th><th>Staff</th><th>Used</th><th>Collection</th><th class="np"></th></tr>${S.books.map(b=>{const R=S.receipts.filter(r=>r.book==b.id);return `<tr><td>${b.sl}</td><td>${b.date}</td><td>${b.from}-${b.to}</td><td>${H(b.staff)}</td><td>${R.length}</td><td>${inr(R.filter(valid).reduce((a,r)=>a+tot(r),0))}</td><td class="np"><button class="s" onclick="bookRcpts(${b.id})">🖨 PDF</button> <button class="xl" onclick="xlBook(${b.id})">📊 Excel</button> <button class="s" onclick="editBook(${b.id})">✏️ Edit</button> <button class="x" onclick="delBook(${b.id})">🗑 Delete</button></td></tr>`}).join('')}</table></div></div>`;
+function editBook(id){const b=bookOf(id);if(!b)return;
+ $('#mb').innerHTML=`<h3>Edit Receipt Book</h3><div class="g"><div><label>Book Sl. No.</label><input id="eb_s" type="number" value="${b.sl}"></div><div><label>Date of issue</label><input id="eb_d" type="date" value="${b.date}"></div><div><label>Range from</label><input id="eb_f" type="number" value="${b.from}"></div><div><label>Range to</label><input id="eb_t" type="number" value="${b.to}"></div><div><label>Assigned staff</label><input id="eb_n" value="${H(b.staff)}"></div></div>
+ <div class="row np"><button onclick="saveBook(${id})">💾 Save changes (password)</button><button class="s" onclick="$('#modal').style.display='none'">Cancel</button></div>`;$('#modal').style.display='flex'}
+function saveBook(id){const b=bookOf(id),o={sl:+$('#eb_s').value,date:$('#eb_d').value,from:+$('#eb_f').value,to:+$('#eb_t').value,staff:$('#eb_n').value.trim()};
+ if(!o.sl||!o.date||!o.staff||o.to<o.from)return alert('Enter valid book number, date, staff and range');if(S.books.some(x=>x.id!=id&&x.sl==o.sl))return alert('Another book already has this number');
+ const used=S.receipts.filter(r=>r.book==id).flatMap(r=>[+r.serial].concat(r.skipped||[]));if(used.length&&(Math.min(...used)<o.from||Math.max(...used)>o.to))return alert('Range must still cover the serials already used ('+Math.min(...used)+' to '+Math.max(...used)+')');
+ if(!askPw())return;Object.assign(b,o);save();$('#modal').style.display='none';view();toast('Receipt book updated')}
+function delBook(id){const b=bookOf(id),R=S.receipts.filter(r=>r.book==id);if(!b)return;
+ if(R.length&&!ULTRA)return alert('Book '+b.sl+' already has '+R.length+' receipt(s).\nOnly the Ultra admin can delete a book that contains receipts.');
+ if(!confirm('Delete receipt book '+b.sl+' ('+b.staff+')'+(R.length?'\n\n⚠ This will also PERMANENTLY delete its '+R.length+' receipt(s).\nDownload a backup first if unsure.':'')+'?'))return;
+ if(R.length&&prompt('Type DELETE to confirm deleting the book and its receipts')!=='DELETE')return alert('Cancelled. Nothing deleted.');if(!askPw())return;
+ (S.deletedLog=S.deletedLog||[]).push({at:new Date().toISOString(),book:b.sl,staff:b.staff,receiptsDeleted:R.length});S.books=S.books.filter(x=>x.id!=id);S.receipts=S.receipts.filter(r=>r.book!=id);save();view();toast('🗑 Receipt book deleted')}
+function addBook(){const o={sl:+$('#bs').value,date:$('#bd').value,from:+$('#bf').value,to:+$('#bt').value,staff:$('#bst').value.trim()};
+ if(!o.staff||o.to<o.from)return alert('Enter staff and a valid range');if(S.books.some(b=>b.sl==o.sl))return alert('Book number exists');if(!askPw())return;o.id=Date.now();S.books.push(o);save();view()}
+function bookList(){dl('receipt-books.csv',csv([['Sl','Issued','From','To','Staff']].concat(S.books.map(b=>[b.sl,b.date,b.from,b.to,b.staff]))),'text/csv')}
+function bookRcpts(id){const b=bookOf(id),c=S.college,R=S.receipts.filter(r=>r.book==id).sort((a,d)=>a.serial-d.serial),v=R.filter(valid),total=v.reduce((a,r)=>a+tot(r),0),mode={},head={};
+ v.forEach(r=>{mode[r.mode]=(mode[r.mode]||0)+tot(r);r.items.forEach(i=>head[i.head]=(head[i.head]||0)+ +i.amt)});
+ const sk=[];R.forEach(r=>(r.skipped||[]).forEach(n=>sk.push([n,r.skipReason])));const used=R.length+sk.length,size=b.to-b.from+1,
+ reg=R.map(r=>[r.serial,r]).concat(sk.map(([n,w])=>[n,{sk:w}])).sort((a,d)=>a[0]-d[0]),
+ tb=(o,t)=>`<table class="fee sm"><tr><th>${t}</th><th class="r">Amount</th></tr>${Object.entries(o).map(([k,x])=>`<tr><td>${H(k)}</td><td class="r">${inr(x)}</td></tr>`).join('')||'<tr><td colspan="2">-</td></tr>'}</table>`;
+ const sum=`<div class="rc sum"><div class="inner"><div class="hd">${c.logo?`<img src="${c.logo}">`:''}<div class="t"><h2>${H(c.name)}</h2><small>${H(c.addr)}</small></div></div>
+ <div class="ttl"><h4>RECEIPT BOOK SUMMARY</h4><span class="tag">BOOK No. ${b.sl}</span></div>
+ <table class="info"><tr><td class="k">Book number</td><td><b>${b.sl}</b></td><td class="k">Serial range</td><td><b>${b.from} – ${b.to}</b> (${size} receipts)</td></tr>
+ <tr><td class="k">Issued on</td><td>${b.date}</td><td class="k">Assigned staff</td><td>${H(b.staff)}</td></tr>
+ <tr><td class="k">Receipts issued</td><td>${R.length} (valid ${v.length})</td><td class="k">Cancelled</td><td>${R.length-v.length}</td></tr>
+ <tr><td class="k">Skipped serials</td><td>${sk.length}</td><td class="k">Unused serials</td><td>${Math.max(0,size-used)}</td></tr></table>
+ <div class="big"><span>TOTAL COLLECTION (valid receipts)</span><span>${inr(total)}</span></div>
+ <div class="two"><div>${tb(mode,'Payment mode')}</div><div>${tb(head,'Purpose / fee head')}</div></div>
+ <h5>Register — sequence wise</h5><table class="fee sm"><tr><th>Sl</th><th>Date</th><th>Student</th><th>Roll</th><th>Mode</th><th class="r">Amount</th><th>Status</th></tr>
+ ${reg.map(([n,r])=>r.sk!==undefined?`<tr><td>${n}</td><td colspan="5" style="color:#92400e">SKIPPED — ${H(r.sk)}</td><td>Skipped</td></tr>`:`<tr style="${r.cancelled?'color:#991b1b':''}"><td>${n}</td><td>${r.date}</td><td>${H(r.name)}</td><td>${H(r.roll)}</td><td>${H(r.mode)}</td><td class="r">${inr(tot(r))}</td><td>${r.cancelled?'Cancelled':'Valid'}</td></tr>`).join('')}</table>
+ <div class="note">Generated on ${today()} · Summary page followed by all receipts of this book in serial order.</div></div></div>`;
+ const w=open('','_blank');if(!w)return alert('Allow pop-ups for this site, then try again');
+ w.document.write('<!DOCTYPE html><meta charset="utf-8"><title>Receipt Book '+b.sl+'</title><style>'+document.querySelector('style').textContent+'</style><style>body{background:#fff!important;padding:0!important;display:block}.pg{padding:10mm}.pg+.pg{page-break-before:always}.pg .rc:not(.sum){font-size:14.5px}.pg .rc:not(.sum) .inner{padding:11mm 11mm 9mm}.pg .rc:not(.sum) .hd h2{font-size:25px}.pg .rc:not(.sum) .hd img{height:84px}.pg .rc:not(.sum) .info td,.pg .rc:not(.sum) .fee td{padding:9px 10px;font-size:14px}.pg .rc:not(.sum) .fee th{padding:9px 10px;font-size:12px}.pg .rc:not(.sum) .grand td{font-size:17px}.pg .rc:not(.sum) .foot{margin-top:40px}.pg .rc:not(.sum) .words{font-size:14px;padding:10px 12px}@media screen{.pg{max-width:210mm;margin:0 auto;border-bottom:2px dashed #94a3b8}}</style><div class="pg">'+sum+'</div>'+R.map(r=>'<div class="pg">'+rcHTML(r)+'</div>').join('')+'<script>onload=()=>setTimeout(print,500)<\/script>');w.document.close()}
+V.stud=()=>{const D=S.dd;return `<div class="card np"><h3>Add Students</h3><div class="g"><div><label>1st → Course</label><select id="sc">${opts(D.course)}</select></div><div><label>2nd → Academic year</label><select id="sy">${opts(D.year)}</select></div><div><label>3rd → Branch</label><select id="sb">${opts(D.dept)}</select></div><div><label>Roll no.</label><input id="sr1"></div><div><label>Name</label><input id="sn"></div></div>
+ <div class="row"><button onclick="addStu()">Add Student</button><button class="s" onclick="$('#xf').click()">Import via Excel (Roll, Name)</button></div><input type="file" id="xf" accept=".xlsx,.xls,.csv" hidden onchange="impStu(this.files[0])"></div>
+ <div class="card"><h3>Students List <span>${xb('xlStud()')}${pbtn}</span></h3><div class="g np"><select id="fc1"><option value="">All courses</option>${opts(D.course)}</select><select id="fy1"><option value="">All years</option>${opts(D.year)}</select><select id="fb1"><option value="">All branches</option>${opts(D.dept)}</select></div><div class="row np"><button class="s" onclick="stuList()">Show</button><button class="x" onclick="clearStu()">Clear DB of this filter</button></div><div id="sl" class="sc"></div></div>`};
+A.stud=()=>stuList();
+const stuF=()=>S.students.filter(s=>(!$('#fc1').value||s.course==$('#fc1').value)&&(!$('#fy1').value||s.year==$('#fy1').value)&&(!$('#fb1').value||s.branch==$('#fb1').value));
+function stuList(){const R=stuF();$('#sl').innerHTML=`<p>${R.length} students</p><table><tr><th>Roll</th><th>Name</th><th>Course</th><th>Year</th><th>Branch</th><th class="np"></th></tr>${R.map(s=>`<tr><td>${H(s.roll)}</td><td>${H(s.name)}</td><td>${H(s.course)}</td><td>${H(s.year)}</td><td>${H(s.branch)}</td><td class="np"><button class="s" onclick="editStu(decodeURIComponent('${enc(s.roll)}'))">Edit</button> <button class="s" onclick="stmt(decodeURIComponent('${enc(s.roll)}'))">Fee Statement</button> <button class="x" onclick="delStu(decodeURIComponent('${enc(s.roll)}'))">Delete</button></td></tr>`).join('')}</table>`}
+function addStu(){const r=$('#sr1').value.trim(),n=$('#sn').value.trim();if(!r||!n)return;if(S.students.some(s=>s.roll==r))return alert('Roll exists');S.students.push({roll:r,name:n,course:$('#sc').value,year:$('#sy').value,branch:$('#sb').value});save();$('#sr1').value=$('#sn').value='';stuList()}
+async function impStu(f){if(!f)return;const wb=XLSX.read(await f.arrayBuffer()),rows=XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]],{header:1});let n=0;
+ rows.forEach((r,i)=>{if(!r[0]||!r[1]||(i==0&&isNaN(r[0])&&/roll/i.test(r[0])))return;if(S.students.some(s=>s.roll==String(r[0]).trim()))return;S.students.push({roll:String(r[0]).trim(),name:String(r[1]).trim(),course:$('#sc').value,year:$('#sy').value,branch:$('#sb').value});n++});save();alert(n+' students imported under the selected course/year/branch');stuList()}
+const enc=x=>encodeURIComponent(x).replace(/'/g,'%27');
+function stmtData(roll){const st=S.students.find(x=>x.roll==roll)||{roll,name:'',course:'',year:'',branch:''},R=S.receipts.filter(r=>String(r.roll).toLowerCase()==String(roll).toLowerCase()).sort((a,b)=>a.date>b.date?1:-1);
+ if(!st.name&&R[0])st.name=R[0].name;return{st,R,v:R.filter(valid)}}
+function stmtHTML(roll){const{st,R,v}=stmtData(roll),c=S.college,tt=v.reduce((a,r)=>a+tot(r),0),hd={};v.forEach(r=>r.items.forEach(i=>hd[i.head]=(hd[i.head]||0)+ +i.amt));
+ return `<div style="text-align:center"><h2 style="margin:0;color:#1e3a8a">${H(c.name)}</h2><small>${H(c.addr)}</small><h3 style="margin:8px 0;border:0">FEE STATEMENT</h3></div>
+ <p><b>${H(st.name)}</b> &nbsp; Roll: <b>${H(st.roll)}</b><br>${H(st.course)} ${H(st.branch)} ${st.year?'| '+H(st.year):''}</p>
+ <p>Receipts issued: <b>${R.length}</b> (valid ${v.length}, cancelled ${R.length-v.length}) &nbsp; <b>Total paid: ${inr(tt)}</b></p>
+ <table border=1 cellpadding=5 style="border-collapse:collapse;width:100%;font-size:12px"><tr style="background:#eef2fb"><th>Date</th><th>Book/Sl</th><th>Particulars</th><th>Mode</th><th>Amount</th></tr>
+ ${R.map(r=>`<tr style="${r.cancelled?'color:#999;text-decoration:line-through':''}"><td>${r.date}</td><td>${bookOf(r.book).sl}/${r.serial}</td><td>${r.items.map(i=>H(i.head)+' ['+H(i.sem)+'] '+inr(i.amt)).join('<br>')}</td><td>${H(r.mode)}</td><td>${r.cancelled?'CANCELLED':inr(tot(r))}</td></tr>`).join('')||'<tr><td colspan=5>No receipts yet</td></tr>'}
+ <tr><th colspan=4 style="text-align:right">Total</th><th>${inr(tt)}</th></tr></table>
+ <p style="margin-top:8px"><b>Head-wise:</b> ${Object.entries(hd).map(([k,x])=>H(k)+' '+inr(x)).join(' &nbsp;|&nbsp; ')||'-'}</p><small>Generated on ${today()}</small>`}
+function stmt(roll){$('#mb').innerHTML=stmtHTML(roll)+`<div class="row np"><button onclick="stmtPdf(decodeURIComponent('${enc(roll)}'))">📄 Download PDF</button><button class="xl" onclick="xlStmt(decodeURIComponent('${enc(roll)}'))">📊 Excel</button><button class="s" onclick="$('#modal').style.display='none'">Close</button></div>`;$('#modal').style.display='flex'}
+
+function xlStmt(roll){const{st,R,v}=stmtData(roll);xl('fee-statement-'+roll,[['Statement',[['Name',st.name],['Roll',st.roll],['Course',st.course],['Branch',st.branch],['Academic year',st.year],['Receipts',R.length],['Total paid (INR)',v.reduce((a,r)=>a+tot(r),0)]]],['Receipts',rtab(R)]])}
+function delStu(roll){const st=S.students.find(x=>x.roll==roll);if(!st||!confirm('Delete student '+st.name+' ('+roll+') from the database? Receipts already issued are kept.'))return;if(!askPw())return;S.students=S.students.filter(x=>x.roll!=roll);save();stuList();toast('Student deleted')}
+const cur=(a,v)=>(!v||a.includes(v))?a:a.concat(v);
+function editStu(roll){const s=S.students.find(x=>x.roll==roll),D=S.dd;if(!s)return;
+ $('#mb').innerHTML=`<h3>Edit Student</h3><div class="g"><div><label>Roll / ID No.</label><input id="es_r" value="${H(s.roll)}"></div><div><label>Full name</label><input id="es_n" value="${H(s.name)}"></div>
+ <div><label>Course</label><select id="es_c">${opts(cur(D.course,s.course),s.course)}</select></div><div><label>Academic year</label><select id="es_y">${opts(cur(D.year,s.year),s.year)}</select></div><div><label>Branch</label><select id="es_b">${opts(cur(D.dept,s.branch),s.branch)}</select></div></div>
+ <label style="font-weight:400"><input type="checkbox" id="es_u" style="width:auto"> Also update name / course / branch on this student's existing receipts (roll changes always relink receipts)</label>
+ <div class="row np"><button onclick="saveStu(decodeURIComponent('${enc(roll)}'))">💾 Save changes (password)</button><button class="s" onclick="$('#modal').style.display='none'">Cancel</button></div>`;$('#modal').style.display='flex'}
+function saveStu(old){const s=S.students.find(x=>x.roll==old),r=$('#es_r').value.trim(),n=$('#es_n').value.trim();if(!s)return;if(!r||!n)return alert('Roll and name are required');
+ if(r.toLowerCase()!=String(old).toLowerCase()&&S.students.some(x=>String(x.roll).toLowerCase()==r.toLowerCase()))return alert('Another student already has this roll number');if(!askPw())return;
+ const up=$('#es_u').checked,c=$('#es_c').value,b=$('#es_b').value;
+ S.receipts.forEach(x=>{if(String(x.roll).toLowerCase()==String(old).toLowerCase()){x.roll=r;if(up){x.name=n;x.course=c;x.branch=b}}});
+ Object.assign(s,{roll:r,name:n,course:c,year:$('#es_y').value,branch:b});save();$('#modal').style.display='none';stuList();toast('Student updated')}
+function clearStu(){const R=stuF();if(R.length&&confirm('Delete '+R.length+' students of this filter?')&&askPw()){S.students=S.students.filter(s=>!R.includes(s));save();stuList()}}
+const DDN={course:'Course',sem:'Semester',dept:'Department',year:'Academic Year',head:'Fee Heads',mode:'Payment Modes'};
+V.dd=()=>Object.keys(DDN).map(k=>`<div class="card"><h3>${DDN[k]}</h3>${S.dd[k].map((x,i)=>`<div class="row"><input value="${H(x)}" readonly><button class="x n" onclick="ddDel('${k}',${i})">×</button></div>`).join('')}<div class="row"><input id="n_${k}" placeholder="New ${DDN[k]}"><button class="s n" onclick="ddAdd('${k}')">Add</button></div></div>`).join('');
+function ddAdd(k){const v=$('#n_'+k).value.trim();if(v&&askPw()){S.dd[k].push(v);save();view()}}
+function ddDel(k,i){if(confirm('Delete this option?')&&askPw()){S.dd[k].splice(i,1);save();view()}}
+V.col=()=>{const c=S.college;return `<div class="card"><h3>College Details ${pbtn}</h3><p><b>${H(c.name)}</b><br>${H(c.addr)}<br>${H(c.phone)} ${H(c.email)} ${H(c.web)}<br>Bank: ${H(c.bank)}</p>${c.qr?`<img src="${c.qr}" height="150">`:'<p>No QR uploaded</p>'}<p><small>${ULTRA?'Edit these in the Ultra tab.':'View only. Only Ultra admin can edit.'}</small></p></div>`};
+V.bak=()=>`${dirty?'<div class="warn">⚠ You have changes that are not in a backup yet. Export a backup now.</div>':''}<div class="card"><h3>Backup & Restore ${pbtn}</h3><button onclick="expBak()">⬇ Export backup (JSON)</button><label>Restore backup</label><input type="file" accept=".json" onchange="resBak(this.files[0])"></div>`;
+async function expBak(){const j=JSON.stringify(S);await put('lastBackup',{at:new Date().toISOString(),json:j});dirty=false;await put('dirty',false);dl('receipts-backup-'+today()+'.json',j,'application/json')}
+function resBak(f){if(!f)return;const r=new FileReader();r.onload=async()=>{try{const d=JSON.parse(r.result);if(!d.receipts||!d.dd)throw 0;if(!confirm('Replace all current data with this backup?'))return;S=d;await save();brand();alert('Restored');view()}catch(e){alert('Invalid backup file')}};r.readAsText(f)}
+V.sec=()=>`<div class="card"><h3>Security — Change Password</h3><label>Current password</label><input id="o" type="password"><label>New password</label><input id="n1" type="password"><label>Confirm new password</label><input id="n2" type="password"><button class="w" onclick="chPw()">Change Password</button><p><small>The Ultra admin password cannot be changed by anyone.</small></p></div>`;
+function chPw(){if($('#o').value!==S.pw)return alert('Current password wrong');if($('#n1').value.length<6||$('#n1').value!==$('#n2').value)return alert('New passwords must match (min 6 chars)');S.pw=$('#n1').value;save();alert('Password changed');view()}
+V.ultra=()=>{const c=S.college,l=S.limit;return `<div class="card"><h3>1. College Details & QR</h3><div class="g"><div><label>College name</label><input id="cn" value="${H(c.name)}"></div><div><label>Address</label><input id="ca" value="${H(c.addr)}"></div><div><label>Phone</label><input id="cp" value="${H(c.phone)}"></div><div><label>Email</label><input id="ce" value="${H(c.email)}"></div><div><label>Website</label><input id="cw" value="${H(c.web)}"></div><div><label>Watermark text (empty = none)</label><input id="cm" value="${H(c.wmText)}"></div></div>
+ <label>Bank & payment details</label><input id="cb" value="${H(c.bank)}"><div class="g"><div><label>Main logo</label><input type="file" id="fl" accept="image/*"><label style="font-weight:400"><input type="checkbox" id="rl" style="width:auto"> Remove logo</label></div><div><label>Watermark image</label><input type="file" id="fw" accept="image/*"><label style="font-weight:400"><input type="checkbox" id="rw" style="width:auto"> Remove watermark image</label></div><div><label>Payment QR image</label><input type="file" id="fq" accept="image/*"><label style="font-weight:400"><input type="checkbox" id="rq" style="width:auto"> Remove QR</label></div></div><button class="w" onclick="saveCol()">Save College Details</button></div>
+ <div class="card"><h3>2. Annual Receipt Limit</h3><div class="g"><div><label>From date</label><input type="date" id="lf" value="${l.from}"></div><div><label>To date</label><input type="date" id="lt" value="${l.to}"></div><div><label>No. of receipts</label><input type="number" id="lm" value="${l.max}"></div></div><button class="w" onclick="S.limit={from:lf.value,to:lt.value,max:+lm.value};save();alert('Saved')">Save Limit</button></div>
+ <div class="card"><h3>3. Backup stored here</h3><button class="s" onclick="lastBak()">⬇ Download last stored backup (JSON)</button></div>
+ <div class="card"><h3>4. Reset whole website</h3><button class="x" onclick="resetAll()">Reset all data</button> <button class="s" onclick="undoReset()">↩ Undo reset</button><p><small>Delete individual receipts from Search & Records (Del button).</small></p></div>`};
+async function saveCol(){const c=S.college;Object.assign(c,{name:cn.value,addr:ca.value,phone:cp.value,email:ce.value,web:cw.value,wmText:cm.value,bank:cb.value});
+ const [a,b,q]=await Promise.all([file2url(fl.files[0]),file2url(fw.files[0]),file2url(fq.files[0])]);if(rl.checked)c.logo='';if(rw.checked)c.wmImg='';if(rq.checked)c.qr='';if(a)c.logo=a;if(b)c.wmImg=b;if(q)c.qr=q;await save();brand();alert('Saved')}
+async function lastBak(){const b=await get('lastBackup');b?dl('last-backup.json',b.json,'application/json'):alert('No backup stored yet. Export one from Backup & Restore.')}
+async function resetAll(){if(prompt('Confirm ultra password (1/2)')!==ULTRA_PW)return;if(prompt('Confirm ultra password again (2/2)')!==ULTRA_PW)return;await put('undo',S);S=fresh();await save();brand();alert('Website reset. You can undo this from the Ultra tab.');view()}
+async function undoReset(){const u=await get('undo');if(!u)return alert('Nothing to undo');if(!confirm('Restore data from before the reset?'))return;S=u;await save();brand();alert('Restored');view()}
+
+/* ---------- print engine (PDF via browser print) ---------- */
+const DCSS=`@page{size:A4;margin:0}*{box-sizing:border-box;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+body{margin:0;font:12px/1.45 "Segoe UI",Arial,sans-serif;color:#0f172a}
+.flow{width:100%;border-collapse:collapse}.flow>thead>tr>td,.flow>tfoot>tr>td{padding:0;border:0}.flow>tbody>tr>td{padding:0 13mm}.sp{height:12mm}
+.wmk{position:fixed;left:0;top:0;width:210mm;height:297mm;display:flex;align-items:center;justify-content:center;z-index:-1;overflow:hidden}
+.wmk span{font:900 96px/1.05 Arial,sans-serif;color:rgba(30,58,138,.13);transform:rotate(-32deg);text-align:center;letter-spacing:6px;max-width:92%}
+.wmk img{max-width:62%;max-height:55%;opacity:.15}
+.lh{display:flex;align-items:center;gap:14px;border-bottom:3px double #1e3a8a;padding-bottom:10px}.lh img{height:68px;max-width:110px;object-fit:contain}
+.lh h1{margin:0;font:800 21px Georgia,serif;color:#1e3a8a;text-transform:uppercase;letter-spacing:.5px}.lh p{margin:2px 0;color:#475569;font-size:11px}
+.dt{display:flex;justify-content:space-between;align-items:baseline;margin:12px 0 10px;padding:6px 12px;background:#1e3a8a;color:#fff;border-radius:4px}.dt b{font-size:15px;letter-spacing:1px;text-transform:uppercase}.dt span{font-size:11px;color:#cfe0ff}
+.kp{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:10px 0}.kp div{border:1px solid #c9d6f2;border-left:4px solid #1e3a8a;padding:6px 9px;background:rgba(238,243,255,.6);border-radius:3px}.kp small{display:block;font-size:9.5px;color:#64748b;text-transform:uppercase;letter-spacing:.5px}.kp b{font-size:15px;color:#1e3a8a}
+h2.sh{font-size:12px;color:#1e3a8a;border-bottom:1.5px solid #1e3a8a;margin:14px 0 6px;padding-bottom:2px;text-transform:uppercase;letter-spacing:.6px}
+.dtb,.card table,.sc table{width:100%;border-collapse:collapse;font-size:11px;margin-bottom:6px}.dtb th,.card th,.sc th{background:#1e3a8a;color:#fff;padding:5px 6px;text-align:left;font-size:10px;text-transform:uppercase}
+.dtb td,.card td,.sc td{padding:4px 6px;border-bottom:1px solid #d9e2f5}.dtb tbody tr:nth-child(even) td,.card tr:nth-child(even) td{background:rgba(238,243,255,.55)}.dtb tr,.card tr{page-break-inside:avoid}.dtb .r{text-align:right}.dtb tfoot td{font-weight:800;background:#e4ecfc;border-top:2px solid #1e3a8a}
+.card{margin-bottom:8px}.card h3,h3{font:700 12px Arial;color:#1e3a8a;text-transform:uppercase;border-bottom:1.5px solid #1e3a8a;padding-bottom:2px;margin:12px 0 6px}.cards{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:8px 0}.st{border:1px solid #c9d6f2;border-left:4px solid #1e3a8a;padding:6px 9px;border-radius:3px;background:rgba(238,243,255,.6)}.st small{display:block;font-size:9.5px;color:#64748b;text-transform:uppercase}.st b{font-size:15px;color:#1e3a8a}.g{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.cx{color:#b91c1c;text-decoration:line-through}.note{font-size:10px;color:#64748b;margin-top:12px;text-align:center}
+.pg{height:296mm;padding:12mm;page-break-after:always;overflow:hidden}.pgs>.pg:last-child{page-break-after:auto}
+.sig2{display:flex;justify-content:space-between;margin-top:42px}.sig2 div{border-top:1px solid #334155;padding-top:3px;min-width:150px;text-align:center;font-size:11px}`;
+const RCSS='';
+const wmInner=()=>{const c=S.college;return c.wmImg?`<img src="${c.wmImg}">`:c.wmText?`<span>${H(c.wmText)}</span>`:''};
+const contact=()=>{const c=S.college;return [c.phone&&'Ph: '+c.phone,c.email,c.web].filter(Boolean).map(H).join(' &nbsp;|&nbsp; ')};
+const lh=()=>{const c=S.college;return `<div class="lh">${c.logo?`<img src="${c.logo}">`:''}<div><h1>${H(c.name)}</h1><p>${H(c.addr)}</p><p>${contact()}</p></div></div>`};
+const docHead=(t,sub)=>lh()+`<div class="dt"><b>${H(t)}</b><span>${sub||''}</span></div>`;
+const flow=x=>`<table class="flow"><thead><tr><td><div class="sp"></div></td></tr></thead><tbody><tr><td>${x}</td></tr></tbody><tfoot><tr><td><div class="sp"></div></td></tr></tfoot></table>`;
+const kpis=a=>`<div class="kp">${a.map(([k,v])=>`<div><small>${k}</small><b>${v}</b></div>`).join('')}</div>`;
+const dtb=(h,rows,foot)=>`<table class="dtb"><thead><tr>${h.map(x=>`<th>${x}</th>`).join('')}</tr></thead><tbody>${rows.map(r=>`<tr${r.cx?' class="cx"':''}>${(r.c||r).map(x=>`<td${/^(₹|-?\d[\d,.]*$)/.test(String(x))?' class="r"':''}>${x}</td>`).join('')}</tr>`).join('')||`<tr><td colspan="${h.length}">No records</td></tr>`}</tbody>${foot?`<tfoot><tr>${foot.map(x=>`<td${/^₹/.test(String(x))?' class="r"':''}>${x}</td>`).join('')}</tr></tfoot>`:''}</table>`;
+const sign=()=>`<div class="sig2"><div>Prepared by</div><div>Accountant / Office</div><div>Principal</div></div><p class="note">Generated on ${fd(today())} · ${H(S.college.name)} · Computer generated report</p>`;
+function printDoc(title,body){const w=open('','_blank');if(!w)return alert('Please allow pop-ups to print / save as PDF');const wm=wmInner();
+ w.document.write(`<!doctype html><html><head><meta charset="utf-8"><title>${H(title)}</title><style>${DCSS}${RCSS}</style></head><body>${wm?`<div class="wmk">${wm}</div>`:''}${body}<script>onload=()=>setTimeout(()=>print(),500)<\/script></body></html>`);w.document.close()}
+function printPage(){const t=((TABS.find(x=>x[0]==tab)||[0,tab])[1]).replace(/^\S+\s/,''),c=$('#app').cloneNode(true);
+ c.querySelectorAll('.np,button,input,select,datalist,.hero,label').forEach(e=>e.remove());c.querySelectorAll('.st b[data-n]').forEach(e=>e.textContent=e.dataset.m?inr(+e.dataset.n):e.dataset.n);
+ printDoc(t,flow(docHead(t,fd(today()))+c.innerHTML+sign()))}
+/* ---------- reports ---------- */
+function pdfRecords(){const R=L.R||[],v=R.filter(valid),hs=L.hs,am=r=>hs?r.items.filter(i=>i.head==hs).reduce((a,i)=>a+ +i.amt,0):tot(r),sum=v.reduce((a,r)=>a+am(r),0);
+ printDoc('Receipt Records',flow(docHead('Receipt Records'+(hs?' — '+hs:''),fd(today()))+kpis([['Records',R.length],['Valid',v.length],['Cancelled',R.length-v.length],[hs?H(hs)+' collected':'Total collection',inr(sum)]])+
+ dtb(['Book/Sl','Date','Student','Roll','Purpose','Mode','Amount'],R.map(r=>({cx:r.cancelled,c:[bookOf(r.book).sl+'/'+r.serial,fd(r.date),H(r.name),H(r.roll),[...new Set(r.items.map(i=>H(i.head)))].join(', '),H(r.mode),inr(am(r))]})),['','','','','','TOTAL',inr(sum)])+sign()))}
+function report(){const t=$('#rt').value,d=new Date($('#rd').value);let a=new Date(d),b=new Date(d);
+ if(t=='Weekly'){a.setDate(d.getDate()-d.getDay());b=new Date(a);b.setDate(a.getDate()+6)}
+ if(t=='Monthly'){a=new Date(d.getFullYear(),d.getMonth(),1);b=new Date(d.getFullYear(),d.getMonth()+1,0)}
+ if(t=='Yearly'){a=new Date(d.getFullYear(),0,1);b=new Date(d.getFullYear(),11,31)}
+ const f=x=>new Date(x.getTime()-x.getTimezoneOffset()*6e4).toISOString().slice(0,10),A1=f(a),B1=f(b);
+ const all=S.receipts.filter(r=>r.date>=A1&&r.date<=B1).sort((x,y)=>x.date>y.date?1:-1),R=all.filter(valid),by={},hd={},dy={},dc={};
+ R.forEach(r=>{by[r.mode]=(by[r.mode]||0)+tot(r);dy[r.date]=(dy[r.date]||0)+tot(r);dc[r.date]=(dc[r.date]||0)+1;r.items.forEach(i=>hd[i.head]=(hd[i.head]||0)+ +i.amt)});
+ const sum=R.reduce((x,r)=>x+tot(r),0);L.repA={t,A1,B1,all,R,by,hd,dy,dc,sum};
+ L.rep=[['Report',t,A1+' to '+B1],['Receipts',all.length],['Cancelled',all.length-R.length],['Total (INR)',sum],[],['Mode','Amount (INR)']].concat(Object.entries(by),[[],['Purpose','Amount (INR)']],Object.entries(hd),[[],['Details'],RH],all.map(rr));
+ const mini=(h,o)=>`<table><tr><th>${h}</th><th>Amount</th></tr>${Object.entries(o).map(([k,v])=>`<tr><td>${H(k)}</td><td>${inr(v)}</td></tr>`).join('')||'<tr><td colspan=2>No data</td></tr>'}</table>`;
+ $('#rp').innerHTML=`<div class="row np" style="margin:10px 0">${xb('xlRep()')}<button class="s" onclick="repPdf()">📄 PDF</button></div><p><b>${t} report: ${fd(A1)} to ${fd(B1)}</b></p><div class="cards"><div class="st"><small>Total collection</small><b>${inr(sum)}</b></div><div class="st"><small>Receipts</small><b>${all.length}</b></div><div class="st"><small>Cancelled</small><b>${all.length-R.length}</b></div></div><div class="g"><div>${mini('Payment mode',by)}</div><div>${mini('Purpose',hd)}</div></div>`}
+function repPdf(){const q=L.repA;if(!q)return;
+ printDoc(q.t+' Report',flow(docHead(q.t+' Collection Report',fd(q.A1)+' to '+fd(q.B1))+kpis([['Total collection',inr(q.sum)],['Receipts issued',q.all.length],['Cancelled',q.all.length-q.R.length],['Average / receipt',inr(q.R.length?q.sum/q.R.length:0)]])+
+ '<h2 class="sh">Payment mode-wise</h2>'+dtb(['Payment mode','Amount'],Object.entries(q.by).map(([k,v])=>[H(k),inr(v)]),['TOTAL',inr(q.sum)])+
+ '<h2 class="sh">Purpose-wise (fee heads)</h2>'+dtb(['Purpose','Amount'],Object.entries(q.hd).map(([k,v])=>[H(k),inr(v)]),['TOTAL',inr(Object.values(q.hd).reduce((a,x)=>a+x,0))])+
+ (q.t!='Daily'?'<h2 class="sh">Day-wise</h2>'+dtb(['Date','Receipts','Amount'],Object.keys(q.dy).sort().map(k=>[fd(k),q.dc[k],inr(q.dy[k])]),['TOTAL',q.R.length,inr(q.sum)]):'')+
+ '<h2 class="sh">Receipt details</h2>'+dtb(['Book/Sl','Date','Student','Roll','Purpose','Mode','Amount'],q.all.map(r=>({cx:r.cancelled,c:[bookOf(r.book).sl+'/'+r.serial,fd(r.date),H(r.name),H(r.roll),[...new Set(r.items.map(i=>H(i.head)))].join(', '),H(r.mode),inr(tot(r))]})))+sign()))}
+/* ---------- student statement PDF ---------- */
+function stmtPdf(roll){const{st,R,v}=stmtData(roll),tt=v.reduce((a,r)=>a+tot(r),0),hd={};v.forEach(r=>r.items.forEach(i=>hd[i.head]=(hd[i.head]||0)+ +i.amt));
+ printDoc('Fee Statement '+roll,flow(docHead('Fee Statement',fd(today()))+dtb(['Student detail','Value'],[['<b>Name</b>',H(st.name)],['<b>Roll / ID</b>',H(st.roll)],['<b>Course / Branch</b>',H(st.course)+' / '+H(st.branch)],['<b>Academic year</b>',H(st.year)||'-']])+
+ kpis([['Total paid',inr(tt)],['Receipts',R.length],['Valid',v.length],['Cancelled',R.length-v.length]])+'<h2 class="sh">Receipts</h2>'+
+ dtb(['Date','Book/Sl','Particulars','Mode','Amount'],R.map(r=>({cx:r.cancelled,c:[fd(r.date),bookOf(r.book).sl+'/'+r.serial,r.items.map(i=>H(i.head)+' ['+H(i.sem)+'] '+inr(i.amt)).join('<br>'),H(r.mode),r.cancelled?'CANCELLED':inr(tot(r))]})),['','','','TOTAL PAID',inr(tt)])+
+ '<h2 class="sh">Purpose-wise</h2>'+dtb(['Purpose','Amount'],Object.entries(hd).map(([k,x])=>[H(k),inr(x)]))+sign()))}
+/* ---------- init ---------- */
+(async()=>{await idb();S=await get('db');if(!S){S=fresh();await put('db',S)}dirty=!!(await get('dirty'));if(!S.mig1){['Laboratory Fees','Library Fees','Caution Money'].forEach(h=>{if(!S.dd.head.includes(h))S.dd.head.push(h)});S.mig1=1;await put('db',S)}
+ brand();
+ if(sessionStorage.s){ULTRA=sessionStorage.s=='u';start()}else loginView();
+ if('serviceWorker' in navigator&&location.protocol.startsWith('http')){/* PWA step later: navigator.serviceWorker.register('sw.js') */}})();
+</script></body></html>
